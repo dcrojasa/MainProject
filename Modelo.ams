@@ -1975,8 +1975,6 @@ Model MCDP {
                                      MsjeValidacion := MsjeValidacion + "\n" + " La ventana de Tiempo Min TMIN   en el nodo   " + i + " en el periodo "  + t +  " En mayor que TMAX "
                             endif
                     endfor;
-                    
-                    !Hola juancho como vas? si viste mi cambio ?
                 }
             }
             Procedure Todas_Las_Validaciones {
