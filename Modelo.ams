@@ -1285,7 +1285,7 @@ Model MCDP {
                 }
                 Comment: "Sum ((i, m in PRC(i), t),CALM(i,m)*INV(i,m,t))+Sum((i,j,k,t),CTRA(i,j)*ATR(i,j,k,t))+sum((k,t),COUV(k)*AVE(k,t))";
             }
-            Variable VRP_MCO {
+            Variable MCDPR_MCO {
                 Range: free;
                 Definition: Sum ((i, m in PRC(i), t),CALM(i,m)*INV(i,m,t))+Sum((v, k in VET(v), i in NPV(k),j in NVV(i,k),t),CTRA(i,j,v)*ATR(i,j,k,t));
             }
@@ -1294,22 +1294,22 @@ Model MCDP {
             Set SRES {
                 SubsetOf: AllConstraints;
             }
-            Set VRP_SRES {
+            Set SVAR {
+                SubsetOf: AllVariables;
+            }
+            Set MCDPR_SRES {
                 SubsetOf: AllConstraints;
                 Definition: {
                     data
                         { CCNV       , AUPC       , APCL       , CPPE       , CAPP       , RACV1      , SRACV1     , RACV2      , RVIN       ,
                           RCPA1      , RCPA2      , BALI       , BAVI       , BAVC1      , BAVC2      , BAVO       , BAVP1      , BAVP2      ,
                           AVOO1      , AVOO2      , RVSA       , ENSA       , RVLL       , AVOP       , DECP       , VRP_SNOR1  , VRP_SNOR3y4,
-                          VRP_LNPE3y4, SVIS       , DTFJ       , DTIJ      , VRP_MCO    }
+                          VRP_LNPE3y4, SVIS       , DTFJ       , DTIJ      , MCDPR_MCO    }
                 }
             }
-            Set VRP_SVAR {
+            Set MCDPR_SVAR {
                 SubsetOf: AllVariables;
-                Definition: data { AVI, APE, ATR, CCC, INV, CCV, TLL, VRP_MCO };
-            }
-            Set SVAR {
-                SubsetOf: AllVariables;
+                Definition: data { AVI, APE, ATR, CCC, INV, CCV, TLL, MCDPR_MCO };
             }
             MathematicalProgram MinimizarCostos {
                 Objective: MCO;
@@ -1318,11 +1318,11 @@ Model MCDP {
                 Variables: SVAR;
                 Type: Automatic;
             }
-            MathematicalProgram VRP_MinimizarCostos {
-                Objective: VRP_MCO;
+            MathematicalProgram MCDPR_MinimizarCostos {
+                Objective: MCDPR_MCO;
                 Direction: minimize;
-                Constraints: VRP_SRES;
-                Variables: VRP_SVAR;
+                Constraints: MCDPR_SRES;
+                Variables: MCDPR_SVAR;
                 Type: Automatic;
             }
         }
@@ -2012,21 +2012,13 @@ Model MCDP {
                 endfor;
             }
         }
-        Procedure INVScero {
-            Body: {
-                for (i in NCL, m in PRO, t) do
-                        INVS(i,m,t):=0;
-                endfor;
-            }
-        }
         Procedure SolucionModeloRuteo {
             Body: {
                 CalculoConjuntos;
                 CalculoConectividadRed;
                 InicializacionVariables;
-                INVScero;
                 !solve MinimizarCostos; Modelo Original
-                solve VRP_MinimizarCostos;
+                solve MCDPR_MinimizarCostos;
             }
         }
     }
