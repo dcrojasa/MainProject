@@ -22,7 +22,7 @@ Model MCDP {
             StringParameter ESCI {
                 IndexDomain: (s);
                 Text: "Escenario indexado";
-                Definition: data { ESC_001 : "'1'",  ESC_002 : "'2'",  ESC_003 : "'3'",  ESC_004 : "'4'",  ESC_005 : "'1'" };
+                Definition: data { ESC_001 : "'1'",  ESC_002 : "'2'",  ESC_003 : "'3'",  ESC_004 : "'4'",  ESC_005 : "'4'" };
                 Comment: {
                     "Debido a que no se puede tener un string parametro indexado en las consultas de SQL, en tonces se crea este escenario
                     el cual se usara para darle los valores a ESCE en cada iteración de lectura de datos, con esto ESCE se igualará al ESCEI(s) para
@@ -332,6 +332,8 @@ Model MCDP {
                 !Casecreate(Directorio_Escenarios,NOES)
                 endfor;
                 !
+                CalculoConjuntos;
+                CalculoConectividadRed;
             }
         }
         Procedure LEER_MAE_TIN {
@@ -1592,6 +1594,61 @@ Model MCDP {
                         ! denotar i en un conjunto de todos menos en los nodos de pernocatación
                     }
                 }
+                Parameter CCTC {
+                    IndexDomain: i;
+                    Text: "Cantidad de Combustible a Transportar a la EDS en los periodos de planificación.";
+                    Definition: sum( (m,t), DEMA(i,m,t))-sum(m, INVI(i,m));
+                }
+                Parameter CPVV {
+                    Text: "La capacidad en volumen promedio de transporte de un vehículo por viaje.";
+                    Definition: sum (l, CACC(l)/CARD(VEH));
+                }
+                Parameter CVVC {
+                    IndexDomain: i;
+                    Text: "Número mínimo de viajes que necesita i";
+                    Definition: {
+                        CEIL(CCTC(i)/CPVV)
+                        !función CEIL retorna el entero menor que sea  mayor que X, donde X es el argumento
+                        !dentro de la función
+                    }
+                }
+                Parameter TCIC {
+                    IndexDomain: (i in NCL);
+                    Text: "El tiempo de ciclo de ir a EDS i desde la planta y volver a la planta";
+                    Definition: {
+                        PTVI(i)+PTIV(i)+TSEP(i)+PTSP
+                        
+                        !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(j)
+                        !TSEP(j) pone problema prque no se define en index dom, mejor se una un promedio de servicio en todas las plantas
+                    }
+                }
+                Parameter TSEP {
+                    IndexDomain: i;
+                    Text: "Tiempo de servicio promedio  en el nodo i ";
+                    Definition: sum(k, TSER(i,k)/CARD(VEH));
+                }
+                Parameter DTTR {
+                    Text: "Demanda  en tiempo que tiene la red";
+                    Definition: sum(i, CVVC(i)*TCIC(i));
+                }
+                Parameter CTTF {
+                    Text: "Capacidad en tiempo de flota ";
+                    Definition: sum((k,t),TFJO(k,t)-TIJO(k,t));
+                }
+                Parameter PTVI {
+                    IndexDomain: (i);
+                    Text: "tiempo de viaje promedio de ir de i a una planta";
+                    Definition: sum (j in NPA, TIVI(i,j))/CARD(NPA);
+                }
+                Parameter PTIV {
+                    IndexDomain: i;
+                    Text: "Tiempo promedio de ir de una planta a la eds i ";
+                    Definition: sum(j in NPA, TIVI(j,i))/CARD(NPA);
+                }
+                Parameter PTSP {
+                    Text: "Promedio de tiempos de servicio en todas las pantas ";
+                    Definition: sum( (k,i in NPA), TSER(i,k))/[CARD(VEH)*CARD(NPA)];
+                }
                 ElementParameter ENPP {
                     IndexDomain: j;
                     Text: "Nodo de pernoctación i  a sociado al nodo origen j";
@@ -1599,12 +1656,6 @@ Model MCDP {
                     Definition: {
                         !{i|PNPP(i,j)=1}
                     }
-                }
-                Set EMPC {
-                    IndexDomain: i in NCL;
-                    SubsetOf: NCL;
-                    Text: "COnjunto indexado sobre sí mismo para usar la función MIn en el parámetro MINT(i)";
-                    Definition: i;
                 }
                 ElementParameter ENPP2 {
                     IndexDomain: j;
@@ -1633,6 +1684,12 @@ Model MCDP {
                     IndexDomain: i in NCL;
                     SubsetOf: NPA;
                     Text: "Planta Más Cercana a la EDS i ";
+                }
+                Set EMPC {
+                    IndexDomain: i in NCL;
+                    SubsetOf: NCL;
+                    Text: "COnjunto indexado sobre sí mismo para usar la función MIn en el parámetro MINT(i)";
+                    Definition: i;
                 }
                 Set PMCE2 {
                     IndexDomain: (j);
@@ -2033,6 +2090,13 @@ Model MCDP {
                     endfor;
                 }
             }
+            Procedure Vlidacion_Caps_VOLUM_TIEMPO {
+                Body: {
+                    if CTTF<DTTR then
+                    	   MsjeValidacion := MsjeValidacion + "\n" + " Es posible que no hayan soluciones factibles respecto a la Capacidad para atender la demanda en tiempo"
+                    endif;
+                }
+            }
             Procedure Todas_Las_Validaciones {
                 Body: {
                     Empty MsjeValidacion;
@@ -2044,6 +2108,9 @@ Model MCDP {
                     Validacion_CAPV_DENS;
                     Validacion_DEM_CACC;
                     Valicacion_VEH_CAPV_CACC;
+                    Validacion_Parametros;
+                    Validacion_TMIN_TMAX;
+                    Vlidacion_Caps_VOLUM_TIEMPO;
                     
                     dialogerror  ( MsjeValidacion)
                 }
