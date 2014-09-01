@@ -1932,14 +1932,16 @@ Model MCDP {
                             endif;
                     endfor;
                     
-                    !CAPSM and CALM
+                    !CAPSM and CALM and INVI(i,m)
                     for (i,m) do
                             if CAPS(i,m)<0 then
-                                     MsjeValidacion := MsjeValidacion + "\n" + " La capacidad máxima  CAPS den el nodo " + i + " del producto "  + m + " ES NEGATIVA "
+                                     MsjeValidacion := MsjeValidacion + "\n" + " La capacidad máxima  CAPS en el nodo " + i + " del producto "  + m + " ES NEGATIVA "
                             endif;
-                    
                             if CALM(i,m)<0 then
-                                     MsjeValidacion := MsjeValidacion + "\n" + " El costo de almacenamiento " + i + " del producto "  + m + " ES NEGATIVA "
+                                     MsjeValidacion := MsjeValidacion + "\n" + " El costo de almacenamiento del nodo" + i + " del producto "  + m + " ES NEGATIVA "
+                            endif;
+                             if INVI(i,m)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + " El Inventatio inicial en el nodo " + i + " del producto "  + m + " ES NEGATIVO "
                             endif;
                     endfor;
                     !TIVI
@@ -1963,6 +1965,60 @@ Model MCDP {
                             endif;
                             if TMAX(i,t)<0 then
                                      MsjeValidacion := MsjeValidacion + "\n" + " La ventana de Tiempo Max TMIN   en el nodo   " + i + " en el periodo "  + t +  " ES NEGATIVA "
+                            endif;
+                    endfor;
+                    
+                    !TSER
+                    for (i,k) do
+                            if TSER(i,k)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "El tiempo de servicio TSER en el nodo   " + i + " del vehículo  "  + k +  " ES NEGATIVO "
+                            endif;
+                    endfor;
+                    
+                    !CACC
+                    for l do
+                            if CACC(l)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "la capacidad máxima CACC del compartimento "  + l +  " ES NEGATIVA "
+                            endif;
+                    endfor;
+                    
+                    !CAPV Y COUV
+                    for k do
+                            if CAPV(K)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "lA capacidad en peso CAPV del vehículo  "  + k +  " ES NEGATIVA "
+                            endif;
+                            if COUV(K)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "El costo de usar el vehículo COUV   "  + k +  " ES NEGATIVO "
+                            endif;
+                    endfor;
+                    
+                    !TFJO y TIJO
+                    for (k,t) do
+                            if TFJO(k,t)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "El tiempo de fin de la jornada TFJO del vehículo  "  + k +  "en el periodo " + t + " ES NEGATIVO "
+                            endif;
+                            if TIJO(K,t)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "El tiempo de fin de la jornada TFJO del vehículo  "  + k +  "en el periodo " + t + " ES NEGATIVO "
+                            endif;
+                    endfor;
+                    
+                    !DENS(m)
+                    for m do
+                            if DENS(m)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "La densidad DENS del producto  "  + m +   " ES NEGATIVA "
+                            endif;
+                    endfor;
+                    
+                    !CCIV
+                    for (m,l) do
+                            if CCIV(m,l)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "El inventario inicial del compartimento "  + l +  " del producto  " + m + " ES NEGATIVO "
+                            endif;
+                    Endfor;
+                    !CCIV
+                    for v do
+                            if CDUV(v)<0 then
+                                     MsjeValidacion := MsjeValidacion + "\n" + "Costo de usar en un día el  vehículo CDUV  del tipo "  + v +   " ES NEGATIVO "
                             endif;
                     endfor;
                 }
