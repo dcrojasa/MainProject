@@ -1868,7 +1868,7 @@ Model MCDP {
                     !Asegurar que para cada Nodo de intercambio exista al menos un producto que se pueda intercambiar
                     for i in NIT do
                             if CARD(PRC(i))<1 then
-                                    MsjeValidacion := MsjeValidacion + "\n" + "El nodo de Intercambio" + i + "No puede intercambiar ningún producto"
+                                    MsjeValidacion := MsjeValidacion + "\n" + "El nodo de Intercambio " + i + " No puede intercambiar ningún producto"
                             endif;
                     endfor;
                     
@@ -1877,7 +1877,7 @@ Model MCDP {
                     !Se hace con dos for porque quiero fijar i y empezar a variar k
                     for i do
                             if sum(k, PNPV(i,k))<1 then
-                                    MsjeValidacion := MsjeValidacion + "\n" + "El nodo " + i + "ser visitado por ningún vehículo (ver PNPV)"
+                                    MsjeValidacion := MsjeValidacion + "\n" + "El nodo " + i + " No puede ser visitado por ningún vehículo (ver PNPV)"
                             endif;
                     endfor;
                     
@@ -1906,13 +1906,13 @@ Model MCDP {
                     
                     ! Cada nodo origen solo debe tener un nodo asociado de Pernoctación y Visceversa
                     for i in NOP do
-                            if sum (j in NPE, PNPP(i,j)<>1) then
+                            if sum (j in NPE, PNPP(j,i))=0 then
                                      MsjeValidacion := MsjeValidacion + "\n" + "El nodo origen potencial" + i + "No está asocuiado a solo un nodo de pernoctación (Ver PNPP)"
                             endif;
                     endfor;
                     
                     for i in NPE do
-                            if sum (j in NOP, PNPP(i,j)<>1) then
+                            if sum (j in NOP, PNPP(i,j))=0 then
                                      MsjeValidacion := MsjeValidacion + "\n" + "El nodo de pernoctaión" + i + "No está asocuiado a solo un nodo origen potencial  (Ver PNPP)"
                             endif;
                     endfor;
