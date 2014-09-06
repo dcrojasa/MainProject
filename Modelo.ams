@@ -44,19 +44,19 @@ Model MCDP {
             StringParameter Directorio_Escenarios;
         }
         DatabaseProcedure DB_MAE_TIN {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: "Select * from  MAE_TIN";
             Property: UseResultSet;
             Mapping: "COD_TIN"-->TIN;
         }
         DatabaseProcedure DB_MAE_MAR {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: "Select * from  MAE_MAR";
             Property: UseResultSet;
             Mapping: "COD_MAR"-->MAR;
         }
         DatabaseProcedure DB_MAE_NOD {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: "SELECT * FROM MAE_NOD WHERE COD_ESC=" + ESCE;
             Property: UseResultSet;
             Mapping: {
@@ -71,7 +71,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_MAE_TIV {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: "Select * from  MAE_TIV";
             Property: UseResultSet;
             Mapping: {
@@ -80,7 +80,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_MAE_VEH {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: "SELECT * FROM MAE_VEH WHERE COD_ESC=" + ESCE;
             Property: UseResultSet;
             Mapping: {
@@ -90,7 +90,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_MAE_PER {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: " SELECT * FROM MAE_PER WHERE  COD_ESC=" + ESCE;
             Property: UseResultSet;
             Mapping: {
@@ -98,7 +98,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_MAE_PRO {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: "Select * from  MAE_PRO";
             Property: UseResultSet;
             Mapping: {
@@ -107,7 +107,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_MAE_COM {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_COM, CACC " +
                                       " FROM MAE_COM WHERE COD_COM IN " +
@@ -121,7 +121,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_NOD_NOD1 {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 "SELECT COD_NOD, COD_NOD1, TIVI, PNPP, DIST " +
                                       " FROM NOD_NOD1 WHERE COD_NOD IN " +
@@ -138,7 +138,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_TIV_VEH {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_TIV, COD_VEH, PVET " +
                                       " FROM TIV_VEH WHERE COD_VEH IN " +
@@ -152,7 +152,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_NOD_PRO {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_NOD, COD_PRO, CALM, CAPS, INVI, PPRC " +
                                       " FROM NOD_PRO WHERE COD_NOD IN " +
@@ -171,7 +171,7 @@ Model MCDP {
             Comment: "Nodos <- Productos";
         }
         DatabaseProcedure DB_NOD_PER {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_NOD, COD_PER, TMIN, TMAX " +
                                       " FROM NOD_PER WHERE COD_NOD IN " +
@@ -188,7 +188,7 @@ Model MCDP {
             Comment: "Nodos Periodos";
         }
         DatabaseProcedure DB_NOD_VEH {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 "SELECT   COD_NOD, COD_VEH, PNPV, TSER, PNOI " +
                                       " FROM NOD_VEH WHERE COD_NOD IN " +
@@ -205,7 +205,7 @@ Model MCDP {
             }
         }
         DatabaseProcedure DB_COM_VEH {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT  COD_VEH, COD_COM, PCOV " +
                                       " FROM COM_VEH WHERE COD_VEH IN " +
@@ -220,7 +220,7 @@ Model MCDP {
             Comment: "Compartimientos<-Vehiculos";
         }
         DatabaseProcedure DB_VEH_PER {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_VEH, COD_PER, TFJO, TIJO " +
                                       " FROM VEH_PER WHERE COD_VEH IN " +
@@ -237,7 +237,7 @@ Model MCDP {
             Comment: "Vehiculos Periodos";
         }
         DatabaseProcedure DB_NOD_NOD1_TIV {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_NOD, COD_NOD1, COD_TIV, CTRA " +
                                        "FROM NOD_NOD1_TIV WHERE COD_NOD IN " +
@@ -254,7 +254,7 @@ Model MCDP {
             Comment: "Nodos Nodos Tipo de Vehículos";
         }
         DatabaseProcedure DB_NOD_PRO_PER {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_NOD, COD_PRO, COD_PER, DEMA, INVS " +
                                       " FROM NOD_PRO_PER WHERE COD_NOD IN " +
@@ -272,7 +272,7 @@ Model MCDP {
             Comment: "Nodos<-Productos-Periodos";
         }
         DatabaseProcedure DB_PRO_COM {
-            DataSource: DATA_ESC;
+            DataSource: "OACEDS";
             SqlQuery: {
                 " SELECT COD_PRO, COD_COM, CCIV FROM PRO_COM " +
                                       " WHERE COD_COM IN " +
@@ -1617,6 +1617,7 @@ Model MCDP {
                     Text: "El tiempo de ciclo de ir a EDS i desde la planta y volver a la planta";
                     Definition: {
                         PTVI(i)+PTIV(i)+TSEP(i)+PTSP
+                        !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(PMC(i))!Esta genera errror, a pesar  de que calcula la planta más cercana a i.
                         
                         !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(j)
                         !TSEP(j) pone problema prque no se define en index dom, mejor se una un promedio de servicio en todas las plantas
