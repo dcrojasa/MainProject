@@ -1303,7 +1303,7 @@ Model MCDP {
                 SubsetOf: AllConstraints;
                 Definition: {
                     data
-                        { CCNV       , AUPC       , APCL       , CPPE       , CAPP       , RACV1      , SRACV1     , RACV2      , RVIN       ,
+                        { CCNV       , AUPC       , APCL       , CPPE       , CAPP         , SRACV1     , RACV2      , RVIN       ,
                           RCPA1      , RCPA2      , BALI       , BAVI       , BAVC1      , BAVC2      , BAVO       , BAVP1      , BAVP2      ,
                           AVOO1      , AVOO2      , RVSA       , ENSA       , RVLL       , AVOP       , DECP       , VRP_SNOR1  , VRP_SNOR3y4,
                           VRP_LNPE3y4, SVIS       , DTFJ       , DTIJ      , MCDPR_MCO    }
@@ -1415,6 +1415,26 @@ Model MCDP {
                 Reglas de Conectividad para reducción de Dominio:"
             }
         }
+        Procedure Seleccion_PAB_Mas_Cercana_EDS {
+            Body: {
+                !Obteniendo la planta j más cercana a la EDS i
+                SBIGM:=100000000000000000;
+                MINI:=SBIGM;
+                For i in NCL do
+                       for j in NPA do
+                               if TIVI(i,j)<MINI then !Identificando si TIVI es menor al paramero auxiliar MINI
+                                      MINI:=TIVI(i,j); !Reemplazando MINT, haciendolo = a TIVI en caso de que TIVI sea MENOR
+                                      PCE(i):=j; !Conjunto con la planta más cercana, necesario en procedimiento Calculo_Reducc_Dom_Conectividad
+                                      EPCE(i):=j; !elemento parámetro para usar como Indice
+                               endif;
+                       endfor;
+                        MINI:=SBIGM; !Inicializando la Bigm
+                Endfor;
+                !Esta forma con solo PMCE1 tiene un problema. El problema es que como sobre escribe, no quedará la Planta y las platas ficticias, queda el último que evaluó
+                !PEMCE2 se crea para sacar la lista de los j que registre, después de eso se saca el Mínimo de este y  se define para esa i en que se está
+                !el j más pequeño.
+            }
+        }
         Procedure Calculo_Reducc_Dom_Conectividad {
             Body: {
                 !1.
@@ -1428,7 +1448,7 @@ Model MCDP {
                 !2. De una EDS no salgo a un nodo de pernoctación que este más lejos (con un exceso porcentual) de lo que
                 !la EDS está de la planta de abastecimiento. Con esto debo garantizar que exista un nodo de pernoctación más
                 !cercano a la planta que cualquier EDS.
-                for (i,j,jj) |i in NCL  and j in NPE and jj in PMC(i) do
+                for (i,j,jj) |i in NCL  and j in NPE and jj in PCE(i) do !También se puede dejar el set PMCE(i) en vez de PMC
                         if TIVI(i,j)>EXCP*TIVI(i,jj) then ! Si el tiempo de viaje de la  EDS i  al Nod pernocta j  es mayor que
                                                           !el tiempo de viaje  de la  EDS i  a la planta jj (que es la planta   más cercana a i) en un exceso porcentual definido, entonces elimine la conectividad
                                 PCON(i,j):=0
@@ -1458,51 +1478,12 @@ Model MCDP {
                 endfor;
             }
         }
-        Procedure Seleccion_PAB_Mas_Cercana_EDS {
-            Body: {
-                !Obteniendo la planta j más cercana a la EDS i
-                SBIGM:=100000000000000000;
-                MINI:=SBIGM;
-                For i in NCL do
-                       for j in NPA do
-                               if TIVI(i,j)<MINI then !Identificando si TIVI es menor al paramero auxiliar MINI
-                                      MINI:=TIVI(i,j); !Reemplazando MINT, haciendolo = a TIVI en caso de que TIVI sea MENOR
-                                      PMCE(i):=j;
-                               endif;
-                       endfor;
-                        MINI:=SBIGM; !Inicializando la Bigm
-                Endfor;
-                !Esta forma con solo PMCE1 tiene un problema. El problema es que como sobre escribe, no quedará la Planta y las platas ficticias, queda el último que evaluó
-                !PEMCE2 se crea para sacar la lista de los j que registre, después de eso se saca el Mínimo de este y  se define para esa i en que se está
-                !el j más pequeño.
-            }
-        }
         Section Validacion_de_Datos {
             DeclarationSection Identificadores_de_Validacion_y_Conexion {
-                Parameter MINT {
-                    IndexDomain: i in NCL;
-                    Text: "Distancias mínimas desde i a una planta la cual aún no se conoce  a cual j corresponde.";
-                    Definition: MIN((ii in EMPC(i) ,j in NPA),TIVI(ii,j));
-                    Comment: "Este parámetro es útil para Calcular el Conjunto PMC(i): PAB más cercana a i";
-                }
                 Parameter TPFM {
                     Text: "Tiempo máximo ala planta ficticia ";
                     Definition: 3;
                     Comment: "Es el tiempo por encima del cual un vehículo no puede  revisitar a la planta de abastecimiento en el mismo periodo.";
-                }
-                Set PMC {
-                    IndexDomain: i in NCL;
-                    SubsetOf: NPA;
-                    Text: "Planta de Abastecimiento más cercana a la EDS i ";
-                    Definition: {
-                        {j in NPA| TIVI(i,j)=MINT(i)}
-                    }
-                    Comment: {
-                        "Identifica las j en Planta tal que el tiempo de viaje de i a j sea igual a MINT(i),  y ya se conoce que MINT(i) tiene el valor
-                        de la menor distancia de  i a una planta. Por tanto donde encuentre que TIVI=MINT, se encuentra el j que representa la planta más cercana a
-                        la EDS i. Incluyendo los nodos ficticios. osea la planta y los ficticios que la representan.
-                        Se utiliza en el procedimiento CaclculoConectividadRED"
-                    }
                 }
                 StringParameter MsjeValidacion;
                 Parameter SCON1 {
@@ -1616,7 +1597,7 @@ Model MCDP {
                     IndexDomain: (i in NCL);
                     Text: "El tiempo de ciclo de ir a EDS i desde la planta y volver a la planta";
                     Definition: {
-                        PTVI(i)+PTIV(i)+TSEP(i)+PTSP
+                        PTVI(i)+PTIV(i)+TSEP(i)+TSEP(EPCE(i))
                         !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(PMC(i))!Esta genera errror, a pesar  de que calcula la planta más cercana a i.
                         
                         !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(j)
@@ -1681,21 +1662,15 @@ Model MCDP {
                     SubsetOf: VEH;
                     Text: "Vehículos con capacidad en Peso que no tienen Capacidad en Volumen ";
                 }
-                Set PMCE {
+                ElementParameter EPCE {
+                    IndexDomain: i in NCL;
+                    Text: "Elemento Parámetro de la planta más cercana a la EDS i ";
+                    Range: NPA;
+                }
+                Set PCE {
                     IndexDomain: i in NCL;
                     SubsetOf: NPA;
                     Text: "Planta Más Cercana a la EDS i ";
-                }
-                Set EMPC {
-                    IndexDomain: i in NCL;
-                    SubsetOf: NCL;
-                    Text: "COnjunto indexado sobre sí mismo para usar la función MIn en el parámetro MINT(i)";
-                    Definition: i;
-                }
-                Set PMCE2 {
-                    IndexDomain: (j);
-                    SubsetOf: NPA;
-                    Text: "COnjunto Auxiliar de plantas potenciales a escoger la más cercana. Procedimiento Validacion_NPE_NPA_EDS";
                 }
             }
             Procedure Definicion_ENPP {
