@@ -2090,7 +2090,7 @@ Model MCDP {
                     endfor;
                 }
             }
-            Procedure Vlidacion_Caps_VOLUM_TIEMPO {
+            Procedure Validacion_Caps_VOLUM_TIEMPO {
                 Body: {
                     if CTTF<DTTR then
                     	   MsjeValidacion := MsjeValidacion + "\n" + " Es posible que no hayan soluciones factibles respecto a la Capacidad para atender la demanda en tiempo"
@@ -2110,7 +2110,7 @@ Model MCDP {
                     Valicacion_VEH_CAPV_CACC;
                     Validacion_Parametros;
                     Validacion_TMIN_TMAX;
-                    Vlidacion_Caps_VOLUM_TIEMPO;
+                    Validacion_Caps_VOLUM_TIEMPO;
                     
                     dialogerror  ( MsjeValidacion)
                 }
