@@ -291,12 +291,13 @@ Model MCDP {
         DatabaseProcedure DB_ESCALARES {
             DataSource: DATA_ESC;
             SqlQuery: {
-                " SELECT COD_ESC, VAL_ESC FROM ESCALARES  "
+                " SELECT COD_SCA,  VAL_ESC FROM ESCALARES WHERE COD_SCA='MBIN'  "
                               !" SELECT COD_ESC, VAL_ESC FROM ESCALARES WHERE COD_ESC='MBIN' "
             }
             Property: UseResultSet;
             Mapping: {
-                "MBIN"-->MBIN ! REVISAR
+                "COD_SCA"-->sc,
+                "VAL_ESC"-->VSCL(sc) ! REVISAR
                 
                               !revisar esto, porque se modificó, la col ya no es MBIN, sino que es un dato de la Tabla
             }
@@ -327,7 +328,7 @@ Model MCDP {
                         Read From Table DB_NOD_NOD1_TIV;
                         Read From Table DB_NOD_PRO_PER;
                         Read From Table DB_PRO_COM;
-                       !Read From Table DB_ESCALARES;
+                        Read From Table DB_ESCALARES;
                 !Casesaveas(ESC(s)) !Guardando el Caso como el valor dentro del elemento parámetro ESC
                 !Casecreate(Directorio_Escenarios,NOES)
                 endfor;
@@ -747,6 +748,10 @@ Model MCDP {
                 Text: "Nodos potenciales de pernoctacion del vehiculo k";
                 Definition: NPE*NPV(k);
             }
+            Set SCA {
+                Text: "Escalares (conjunto de escalares usado en la lectura de datos)";
+                Index: sc;
+            }
         }
         DeclarationSection Parametros_Leidos {
             Parameter DEMA {
@@ -823,15 +828,16 @@ Model MCDP {
             }
             Parameter MBIN {
                 Text: "Numero un poco más grande que uno";
-                Definition: 1.1;
+                Definition: VSCL('MBIN');
             }
             Parameter DIST {
                 IndexDomain: (i,j);
                 Text: "Distancia del nodo i al nodo j";
                 Comment: "Esta se usa para realizar procedimientos en conectividad para reducir dominio";
             }
-            Parameter MAXD {
-                Text: "Maxima distancia a permitir ";
+            Parameter VSCL {
+                IndexDomain: sc;
+                Text: "Valor del escalar sc";
             }
         }
         DeclarationSection Parametros_Calculados {
@@ -1478,6 +1484,11 @@ Model MCDP {
                 endfor;
             }
         }
+        DeclarationSection Parametros_Procesamiento_de_Datos {
+            Parameter MAXD {
+                Text: "Maxima distancia a permitir ";
+            }
+        }
         Section Validacion_de_Datos {
             DeclarationSection Identificadores_de_Validacion_y_Conexion {
                 Parameter TPFM {
@@ -2111,7 +2122,7 @@ Model MCDP {
                     Validacion_Parametros;
                     Validacion_TMIN_TMAX;
                     Validacion_Caps_VOLUM_TIEMPO;
-                    
+                    Validacion_VEH_NOP;
                     dialogerror  ( MsjeValidacion)
                 }
             }
