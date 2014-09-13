@@ -439,18 +439,11 @@ Model MCDP {
                 Index: t;
                 CurrentPeriod: PINI;
                 IntervalLength: PEPA;
-                Definition: {
-                    PERH
-                    !ElementRange(0,MPER,prefix:"t-")
-                }
+                Definition: PERH;
             }
             Set PERH {
                 Text: "Periodos totales  para definir Horizonte con Bases de Datos";
                 Index: Peri;
-            }
-            Parameter MPER {
-                Text: "Maximo número de periodos";
-                Definition: 2;
             }
             ElementParameter PINI {
                 Text: "Periodo Inicial";
@@ -464,13 +457,17 @@ Model MCDP {
             }
             Parameter PEPA {
                 Text: "Periodos de planificación";
-                Definition: {
-                    2 !CARD(PHO)-1
-                }
+                Definition: CARD(PHO)-1;
+            }
+            Set PPR {
+                SubsetOf: PHO;
+                Text: "Periodos de Planificacion si el primer periodo";
+                Definition: PHO-PEI-element(PHO,1);
             }
             Set PEP {
                 SubsetOf: PHO;
-                Definition: PHO-PEI-element(PHO,1);
+                Text: "Periodos de Planificacion";
+                Definition: PHO-element(PHO,1);
             }
         }
         DeclarationSection Conjuntos_leidos {
@@ -1120,19 +1117,19 @@ Model MCDP {
                     Definition: AVI(i,k,t)=1;
                 }
                 Constraint SNOR2 {
-                    IndexDomain: (i,k,t)|i in NOK(k) and t in PEP;
+                    IndexDomain: (i,k,t)|i in NOK(k) and t in PPR;
                     Text: "Salidad en el nodo origen en periodos despues del inicial";
                     Definition: sum(j in NVV(i,k), ATR(i,j,k,t))<=AVE(k,t);
                     Comment: "Si no utilizo el vehículo no debo salir del nodo origen del periodo";
                 }
                 Constraint SNOR3 {
-                    IndexDomain: (i,k,t)|i in NOK(k) and t in PEP;
+                    IndexDomain: (i,k,t)|i in NOK(k) and t in PPR;
                     Text: "Salidad en el nodo origen en periodos despues del inicial";
                     Definition: sum(j in NVV(i,k), ATR(i,j,k,t))>=AVI(i,k,t)-MBIN*(1-AVE(k,t));
                     Comment: "Si utilizo el vehículo debo salir del nodo inicial del vehículo en dicho periodo";
                 }
                 Constraint SNOR4 {
-                    IndexDomain: (i,k,t)|i in NOK(k) and t in PEP;
+                    IndexDomain: (i,k,t)|i in NOK(k) and t in PPR;
                     Text: "Salidad en el nodo origen en periodos despues del inicial";
                     Definition: sum(j in NVV(i,k), ATR(i,j,k,t))<=AVI(i,k,t)+MBIN*(1-AVE(k,t));
                     Comment: "i utilizo el vehículo debo salir del nodo inicial del vehículo en dicho periodo";
@@ -1236,7 +1233,7 @@ Model MCDP {
                     Comment: "Nota: recuerde que SNOR2 no se tendrá en cuenta al hacer el conjunto de restricciones de este modelo matemático";
                 }
                 Constraint VRP_SNOR3y4 {
-                    IndexDomain: (i,k,t)|i in NOK(k) and t in PEP;
+                    IndexDomain: (i,k,t)|i in NOK(k) and t in PPR;
                     Text: "Salidad en el nodo origen en periodos despues del inicial  para Progrma Simpliificado VRP";
                     Definition: {
                         sum(j in NVV(i,k), ATR(i,j,k,t))=AVI(i,k,t)
@@ -1615,7 +1612,7 @@ Model MCDP {
                 }
                 Parameter CTTF {
                     Text: "Capacidad en tiempo de flota ";
-                    Definition: sum((k,t),TFJO(k,t)-TIJO(k,t));
+                    Definition: sum((k,t)|t in PEP,TFJO(k,t)-TIJO(k,t));
                 }
                 Parameter PTVI {
                     IndexDomain: (i);
@@ -1879,7 +1876,7 @@ Model MCDP {
                     
                     !Asegurando que el subconjunto de Periodos PEP tenga elementos
                     
-                    if CARD(PEP)=0 then
+                    if CARD(PPR)=0 then
                             MsjeValidacion := MsjeValidacion + "\n" + "El subconjunto de periodos PEP está Vacío"
                     endif;
                     
@@ -2066,7 +2063,7 @@ Model MCDP {
                     endfor;
                 }
             }
-            Procedure Vlidacion_Caps_VOLUM_TIEMPO {
+            Procedure Validacion_Caps_VOLUM_TIEMPO {
                 Body: {
                     if CTTF<DTTR then
                     	   MsjeValidacion := MsjeValidacion + "\n" + " Es posible que no hayan soluciones factibles respecto a la Capacidad para atender la demanda en tiempo"
@@ -2086,7 +2083,7 @@ Model MCDP {
                     Valicacion_VEH_CAPV_CACC;
                     Validacion_Parametros;
                     Validacion_TMIN_TMAX;
-                    Vlidacion_Caps_VOLUM_TIEMPO;
+                    Validacion_Caps_VOLUM_TIEMPO;
                     
                     dialogerror  ( MsjeValidacion)
                 }
