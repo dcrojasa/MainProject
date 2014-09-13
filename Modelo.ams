@@ -2070,6 +2070,29 @@ Model MCDP {
                     endif;
                 }
             }
+            Procedure Validacion_VEH_NOP {
+                Body: {
+                    !Todos los vehículos deben tener un nodo origen asociado
+                    
+                    for k do
+                    	if sum(i| i in NOP,PNOI(i ,k ))=0 then
+                    		MsjeValidacion:= MsjeValidacion + "\n" + " El vehículo  "  + k +" No esta asociado a ningún nodo origen al iniciar corrida (ver PNOI) " ;
+                    	elseif  sum(i in NOP,PNOI(i ,k ))>1 then !Cada vehículo no debe tener más de un nodo origen asociado. Solamente uno
+                    			MsjeValidacion:= MsjeValidacion + "\n" + " El vehículo  "  + k +" Está asociado a más de un nodo origen potencial a la vez " ;
+                    	endif;
+                    !La asociación de del vehículo al nodo origen debe se a un Nodo origen  y no otro tipo de nodo
+                    	if sum(i|i in NPA or i in NCL or i in NPE,PNOI(i ,k ))>0 then
+                    		MsjeValidacion:= MsjeValidacion + "\n" + " El vehículo  "  + k +" Est asociado a  un nodo  que no es del tipo nodo origen" ;
+                    	endif
+                    endfor;
+                }
+            }
+            Procedure Validacion_BIGMs {
+                Body: {
+                    !Que todos los  parámetros tengan valores lógicos, ver las Big M
+                    !Validación MBIN
+                }
+            }
             Procedure Todas_Las_Validaciones {
                 Body: {
                     Empty MsjeValidacion;
