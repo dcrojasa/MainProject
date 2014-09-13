@@ -493,12 +493,18 @@ Model MCDP {
                 }
                 Comment: "Este conjunto incluye las plantas dummy, para permitir recirculación";
             }
+            Set NPO {
+                SubsetOf: NPA;
+                Text: "Nodos planta originales";
+                Definition: {
+                    {i in NOD| TNOD(i)="PLAOR"}
+                }
+            }
             Set NPF {
                 SubsetOf: NPA;
                 Text: "Nodos plantas ficticias ";
                 Definition: {
-                    {i in NOD| TNOD(i)="PLANT"} !Ojo esto es temporral, aquí debe ir la definición que está comenada
-                    !{i in NOD| TNOD(i)="PLAFI"}
+                    {i in NOD| TNOD(i)="PLAFI"}
                     !Se debería leer de la base de datos
                 }
                 Comment: "Se usan en el procedimiento de validación Calculo_Reducc_Dom_PFICT";
@@ -1418,7 +1424,7 @@ Model MCDP {
                 SBIGM:=100000000000000000;
                 MINI:=SBIGM;
                 For i in NCL do
-                       for j in NPA do
+                       for j in NPO do
                                if TIVI(i,j)<MINI then !Identificando si TIVI es menor al paramero auxiliar MINI
                                       MINI:=TIVI(i,j); !Reemplazando MINT, haciendolo = a TIVI en caso de que TIVI sea MENOR
                                       PCE(i):=j; !Conjunto con la planta más cercana, necesario en procedimiento Calculo_Reducc_Dom_Conectividad
@@ -1427,9 +1433,6 @@ Model MCDP {
                        endfor;
                         MINI:=SBIGM; !Inicializando la Bigm
                 Endfor;
-                !Esta forma con solo PMCE1 tiene un problema. El problema es que como sobre escribe, no quedará la Planta y las platas ficticias, queda el último que evaluó
-                !PEMCE2 se crea para sacar la lista de los j que registre, después de eso se saca el Mínimo de este y  se define para esa i en que se está
-                !el j más pequeño.
             }
         }
         Procedure Calculo_Reducc_Dom_Conectividad {
@@ -1594,7 +1597,8 @@ Model MCDP {
                     IndexDomain: (i in NCL);
                     Text: "El tiempo de ciclo de ir a EDS i desde la planta y volver a la planta";
                     Definition: {
-                        PTVI(i)+PTIV(i)+TSEP(i)+TSEP(EPCE(i))
+                        TIVI(EPCE(i),i)+TIVI(i,EPCE(i))+TSEP(i)+TSEP(EPCE(i))
+                        !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(EPCE(i))
                         !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(PMC(i))!Esta genera errror, a pesar  de que calcula la planta más cercana a i.
                         
                         !PTVI(i)+PTIV(i)+TSEP(i)+TSEP(j)
