@@ -23,4 +23,3 @@ solver_listing 1
 * XA 15
 * NETSOL
 * Environment
-Data_Management_Style 1
