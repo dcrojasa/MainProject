@@ -850,8 +850,11 @@ Model MCDP {
             Parameter MACV {
                 IndexDomain: (i,k);
                 Text: "Número muy grande asociado a la restricción subrogada  SRACV1";
-                Definition: [CARD(COV(k))*CARD(PRC(i))];
-                Comment: "Este es el valor mas pequeño posible para MSVI, depedende de los parametros de la ecuacion SVIS y de los valores mas grandes que pueden tomar las variables";
+                Definition: {
+                    CARD(COV(k))
+                    ![CARD(COV(k))*CARD(PRC(i))]
+                }
+                Comment: "No se porque antes aparecia [CARD(COV(k))*CARD(PRC(i))] si con la cantidad de compartimientos de un vehículo basta";
             }
             Parameter COGV {
                 IndexDomain: (v);
@@ -2366,14 +2369,45 @@ Model MCDP {
                     Constraint AUPC {
                         IndexDomain: (i,l,t)|i in NCC(l);
                         Text: "Asignación único producto a compartimiento en nodo cliente";
-                        Definition: sum(m|m in PRC(i), AUPC(i,l,t))<=1;
+                        Definition: sum(m|m in PRC(i), APE(i,m,l,t))<=1;
                         Comment: {
-                            "!Esta restriccion permite que el mismo compartimiento se asigne a un solo producto pero a otro cliente"
+                            "!Esta restriccion permite que el mismo compartimiento se asigne a un solo producto pero a otro cliente.
+                            No significa que haga dos entregas en el mismo viaje, sino que implicará que haga otro viaje"
                         }
                     }
                 }
-                DeclarationSection Capacidad;
-                DeclarationSection Relacion;
+                DeclarationSection Capacidad {
+                    Constraint CPPE {
+                        IndexDomain: (i,m,t)|i in NCL and m in PRC(i);
+                        Text: "Capacidad permitida de producto entregado";
+                        Comment: {
+                            "Esta ecuación garantiza que INV(i,m) sea menor que CAPS siempre.
+                            Porque si sum(l| l in CNO(i), CCC(i,m,l,t)) + INV(i,m,t-1) <=CAPS(i,m)
+                            entonces INV(i,m,t)=CCC(i,m,l,t)) + INV(i,m,t-1)-DEMA(i,m,t) <= CAPS(i,m)"
+                        }
+                    }
+                    Constraint CAPP {
+                        IndexDomain: (i,k,t)|i in NCK(k);
+                        Text: "Capacidad en peso del vehiculo";
+                        Definition: sum((m,l)|(m in PRC(i) and l in CNO(i)),DENS(m)*CCC(i,m,l,t))<=CAPV(k);
+                    }
+                }
+                DeclarationSection Relacion {
+                    Constraint RACV1 {
+                        IndexDomain: (i,m,k,l,t)|(i in NCC(l) and m in PRC(i) and l in COV(k));
+                        Text: "Si al menos un compartimiento es asignado a un cliente -> El vehículo del compartimiento debe visitar el cliente.";
+                        Definition: APE(i,m,l,t)<=AVI(i,k,t);
+                    }
+                    Constraint S_RACV1 {
+                        IndexDomain: (i,k,t);
+                        Definition: sum((m,l)|m in PRC(i) and l in COV(k), APE(i,m,l,t))<=MACV(i,k)*AVI(i,k,t);
+                    }
+                    Constraint RACV2 {
+                        IndexDomain: (i,k,t)|i in NCK(k);
+                        Text: "Si un vehículo atiende un cliente -> Al menos un compartimiento del vehículo es asignado para atender el cliente";
+                        Definition: sum((m,l)|m in PRC(i) and l in COV(k), APE(i,m,l,t))>=AVI(i,k,t);
+                    }
+                }
                 DeclarationSection Flujo_de_Producto;
             }
             DeclarationSection Funcion_Objetivo;
