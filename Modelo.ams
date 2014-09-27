@@ -858,6 +858,11 @@ Model MCDP {
                 Text: "Costo Global de usar un tipo vehiculo ";
                 Definition: PEPA*CDUV(v);
             }
+            Parameter CATI {
+                IndexDomain: (k,t);
+                Text: "Capacidad de tiempo del vehiculo k en el periodo t";
+                Definition: TFJO(k,t)-TIJO(k,t);
+            }
         }
         Section Variables_Modelo {
             DeclarationSection Variables_Asignacion {
@@ -2308,6 +2313,72 @@ Model MCDP {
             StringParameter NombreLibro {
                 Definition: "TablasDatosMCDP.xlsm";
             }
+        }
+    }
+    Module IVAP {
+        Prefix: io;
+        Section Elementos_Modelo_Matematico {
+            Section Variables_Modelo {
+                DeclarationSection Variables_Asignacion {
+                    Variable APE {
+                        IndexDomain: (i,m,l,t)|i in NCL and m in PRC(i) and l in CNO(i);
+                        Text: "Asignación producto m al compartimiento l al nodo cliente i en t";
+                        Range: binary;
+                    }
+                    Variable AVI {
+                        IndexDomain: (i,k,t);
+                        Range: free;
+                    }
+                    Variable AVE {
+                        IndexDomain: (k,t);
+                        Text: "Asignación de uso de vehículo k en t";
+                        Range: binary;
+                    }
+                    Variable AVG {
+                        IndexDomain: t;
+                        Text: "Asignación Global de uso de Vehículo: Si se utiliza en  el Horizonte de plaificación.";
+                        Range: binary;
+                    }
+                }
+                DeclarationSection Variables_Cantidad {
+                    Variable CCC {
+                        IndexDomain: (i,m,l,t)|i in NCL and m in PRC(i) and l in CNO(i);
+                        Text: "Cantidad de producto m en el compartimiento l que se entrega a nodo cliente i en t";
+                        Range: [0, CACC(l)];
+                    }
+                    Variable INV {
+                        IndexDomain: (i,m,t)|i in NCL and m in PRC(i);
+                        Text: "Inventario del cliente i del producto m en el tiempo t";
+                        Range: [INVS(i, m, t), inf);
+                    }
+                }
+                DeclarationSection Variables_Tiempo {
+                    Variable TNC {
+                        IndexDomain: (k,t);
+                        Text: "Tiempo extra necesario para completar las asignaciones de viajes del vehiculo k en el periodo t";
+                        Range: nonnegative;
+                        Comment: "Todos los ciclos se deben completar en menos de 2 periodos";
+                    }
+                }
+            }
+            Section Restricciones {
+                DeclarationSection Asignacion {
+                    Constraint AUPC {
+                        IndexDomain: (i,l,t)|i in NCC(l);
+                        Text: "Asignación único producto a compartimiento en nodo cliente";
+                        Definition: sum(m|m in PRC(i), AUPC(i,l,t))<=1;
+                        Comment: {
+                            "!Esta restriccion permite que el mismo compartimiento se asigne a un solo producto pero a otro cliente"
+                        }
+                    }
+                }
+                DeclarationSection Capacidad;
+                DeclarationSection Relacion;
+                DeclarationSection Flujo_de_Producto;
+            }
+            DeclarationSection Funcion_Objetivo;
+            DeclarationSection Problemas_Matematicos;
+            Section Solucion_Modelo;
         }
     }
     Procedure MainInitialization;
