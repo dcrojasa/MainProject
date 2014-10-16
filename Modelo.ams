@@ -22,7 +22,7 @@ Model MCDP {
             StringParameter ESCI {
                 IndexDomain: (s);
                 Text: "Escenario indexado";
-                Definition: data { ESC_001 : "'1'",  ESC_002 : "'2'",  ESC_003 : "'3'",  ESC_004 : "'4'",  ESC_005 : "'4'" };
+                Definition: data { ESC_001 : "'1'",  ESC_002 : "'2'",  ESC_003 : "'3'",  ESC_004 : "'4'",  ESC_005 : "'5'" };
                 Comment: {
                     "Debido a que no se puede tener un string parametro indexado en las consultas de SQL, en tonces se crea este escenario
                     el cual se usara para darle los valores a ESCE en cada iteración de lectura de datos, con esto ESCE se igualará al ESCEI(s) para
